@@ -1,9 +1,11 @@
-use super::tokens::{Token, TokenTypes};
+use super::tokens::{Token, TokenList, TokenTypes};
+use crate::ast::asttree;
 use crate::utils::errors::throw_custom_error;
 // A tokenizer that extracts different tokens from an input string
 pub struct Scanner {
     data: String,
     cur_idx: usize,
+    tokens: Vec<Token>,
 }
 
 impl Scanner {
@@ -11,6 +13,7 @@ impl Scanner {
         Scanner {
             data: data,
             cur_idx: 0,
+            tokens: Vec::new(),
         }
     }
 
@@ -57,16 +60,13 @@ impl Scanner {
     fn scan(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let token = self.get_next_token();
         let token_type = token.get_type();
+        self.tokens.push(token.clone());
         if token_type == TokenTypes::T_INTLIT {
-            let digit_string = self.scanint(token.get_value());
-            let val = digit_string.parse::<u64>()?;
-            println!("{} , {}", token_type.to_string(), val);
+            self.scanint(token.get_value());
         } else if token_type == TokenTypes::T_INVALID {
             let val = std::char::from_u32(token.get_value() as u32).unwrap();
             let err_message = format!("Found invalid token {}", val);
             return Err(throw_custom_error(&err_message));
-        } else {
-            println!("{}", token_type.to_string());
         }
         Ok(())
     }
@@ -74,13 +74,19 @@ impl Scanner {
     pub fn has_next_token(&self) -> bool {
         self.cur_idx < self.data.len()
     }
+
+    pub fn get_token_list(&self) -> Vec<Token> {
+        return self.tokens.to_vec();
+    }
 }
 
-pub fn start_scanner(filedata: String) -> Result<(), Box<dyn std::error::Error>> {
+pub fn start_scanner(filedata: String) -> Result<TokenList, Box<dyn std::error::Error>> {
     let mut scanner = Scanner::new(filedata);
     while scanner.has_next_token() {
         scanner.scan()?;
         scanner.advance()
     }
-    Ok(())
+    scanner.tokens.push(Token::new_eof_token());
+
+    Ok(TokenList::new(scanner.tokens))
 }

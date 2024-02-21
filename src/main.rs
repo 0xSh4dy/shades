@@ -1,7 +1,10 @@
 use utils::file;
+use codegenerator::generator::generate_code;
 use lexer::scanner::start_scanner;
 mod lexer;
 mod utils;
+mod ast;
+mod codegenerator;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {
@@ -15,7 +18,9 @@ fn main() {
                     Ok(file_data) => {
                         let res = start_scanner(file_data);
                         match res{
-                            Ok(_)=>{},
+                            Ok(token_list)=>{
+                                generate_code(token_list);
+                            },
                             Err(err)=>{println!("{}",err)}
                         };
                     }

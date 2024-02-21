@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "anshi"
+name = "shades"
 version = "0.1.0"

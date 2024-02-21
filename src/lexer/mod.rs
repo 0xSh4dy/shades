@@ -1,4 +1,3 @@
 pub mod scanner;
+pub mod tokens;
 mod parser;
-mod tokens;
-mod astnode;

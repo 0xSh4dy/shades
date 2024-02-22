@@ -1,6 +1,6 @@
+use crate::{lexer::keywords::get_keyword, utils::errors::throw_custom_error};
+
 use super::tokens::{Token, TokenList, TokenTypes};
-use crate::ast::asttree;
-use crate::utils::errors::throw_custom_error;
 // A tokenizer that extracts different tokens from an input string
 pub struct Scanner {
     data: String,
@@ -8,6 +8,10 @@ pub struct Scanner {
     tokens: Vec<Token>,
 }
 
+// Maximum allowed length of keywords or identifiers
+const MAX_KILEN: i32 = 0x40;
+
+#[allow(dead_code)]
 impl Scanner {
     pub fn new(data: String) -> Scanner {
         Scanner {
@@ -45,8 +49,24 @@ impl Scanner {
                 break;
             }
         }
-
         return digit_string;
+    }
+
+    fn scan_char_sequence(&mut self, c: char) -> String {
+        let mut ret_str = String::new();
+        ret_str.push(c);
+        self.advance();
+        while self.has_next_token() {
+            let cur_char = self.data.chars().nth(self.cur_idx).unwrap();
+            if cur_char.is_ascii_alphanumeric() {
+                ret_str.push(cur_char);
+                self.advance();
+            } else {
+                self.stepback();
+                break;
+            }
+        }
+        return ret_str;
     }
 
     fn stepback(&mut self) {
@@ -60,14 +80,27 @@ impl Scanner {
     fn scan(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let token = self.get_next_token();
         let token_type = token.get_type();
-        self.tokens.push(token.clone());
+        let mut token_to_push = token.clone();
+
         if token_type == TokenTypes::T_INTLIT {
-            self.scanint(token.get_value());
+            let digit_string = self.scanint(token.get_value());
+            let int_value: usize = digit_string.parse()?;
+            token_to_push.set_value(int_value);
         } else if token_type == TokenTypes::T_INVALID {
             let val = std::char::from_u32(token.get_value() as u32).unwrap();
-            let err_message = format!("Found invalid token {}", val);
-            return Err(throw_custom_error(&err_message));
+            if val.is_alphabetic() {
+                let char_sequence = self.scan_char_sequence(val);
+                let keyword_token = get_keyword(&char_sequence);
+                if keyword_token == TokenTypes::T_PRINT {
+                    token_to_push.set_type(keyword_token);
+                }
+            }
+            else{
+                let err_message = format!("Found invalid token {}", val);
+                return Err(throw_custom_error(&err_message));
+            }
         }
+        self.tokens.push(token_to_push);
         Ok(())
     }
 

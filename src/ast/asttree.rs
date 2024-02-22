@@ -1,8 +1,9 @@
-use std::ops::IndexMut;
-use std::ptr::null;
+use crate::lexer::tokens::{TokenList, TokenTypes};
 
-use super::astnode::{create_primary_node, AstNode, AstOperation};
-use crate::lexer::tokens::{Token, TokenList, TokenTypes};
+use super::{
+    astnode::{create_primary_node, AstNode, AstOperation},
+    oppred::get_precedence,
+};
 
 #[allow(dead_code)]
 pub fn in_order_traversal(root_node: Option<&Box<AstNode>>) {
@@ -17,40 +18,33 @@ pub fn in_order_traversal(root_node: Option<&Box<AstNode>>) {
     }
 }
 
-pub fn evaluate_binary_ast(root_node: Option<&Box<AstNode>>) -> u64 {
-    if let Some(node) = root_node {
-        if !(*node).is_leaf_node() {
-            let left_val = evaluate_binary_ast((*node).get_left_child());
-            let right_val = evaluate_binary_ast((*node).get_right_child());
-            let op = (*node).get_op();
-            if op == AstOperation::Add {
-                return left_val + right_val;
-            } else if op == AstOperation::Subtract {
-                return left_val - right_val;
-            } else if op == AstOperation::Multiply {
-                return left_val * right_val;
-            } else if op == AstOperation::Divide {
-                return left_val / right_val;
-            }
-        } else {
-            return (*node).get_actual_intval();
-        }
-    }
-    return 0;
-}
-
-pub fn build_binary_ast_tree(mut tokens: TokenList) -> Option<Box<AstNode>> {
-    let token_opt = tokens.next();
-    if let Some(token) = token_opt {
-        let left = create_primary_node(&token);
-        let token_opt = tokens.next();
-        if let Some(token) = token_opt {
-            if token.get_type() == TokenTypes::T_EOF {
+// Pratt Parser for handling operator precedence
+// Node with higher operator precedence must stay lower in the tree
+pub fn build_ast(tokens: &mut TokenList, prev_oppred: i32) -> Option<Box<AstNode>> {
+    // Get the integer literal on the left and create a node
+    if let Some(left_token) = tokens.next() {
+        let mut left = create_primary_node(&left_token);
+        if let Some(mut next_tok) = tokens.peek() {
+            if next_tok.get_type() == TokenTypes::T_SEMICOLON {
                 return Some(left);
             }
-            let optype = token.to_ast_operation();
-            let right_opt = build_binary_ast_tree(tokens);
-            return Some(AstNode::create(optype, Some(left), right_opt, 0));
+            while let Some(curr_pred) = get_precedence(next_tok.get_type()) {
+                if curr_pred > prev_oppred {
+                    tokens.next();
+                    let right = build_ast(tokens, curr_pred);
+                    let op = next_tok.to_ast_operation();
+                    left = AstNode::create(op, Some(left), right, 0);
+                    if let Some(x) = tokens.peek() {
+                        if x.get_type() == TokenTypes::T_SEMICOLON {
+                            return Some(left);
+                        }
+                        next_tok = x;
+                    }
+                } else {
+                    break;
+                }
+            }
+            return Some(left);
         }
     }
     return None;

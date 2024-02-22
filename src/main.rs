@@ -18,8 +18,8 @@ fn main() {
                     Ok(file_data) => {
                         let res = start_scanner(file_data);
                         match res{
-                            Ok(token_list)=>{
-                                generate_code(token_list);
+                            Ok(mut token_list)=>{
+                                generate_code(&mut token_list);
                             },
                             Err(err)=>{println!("{}",err)}
                         };

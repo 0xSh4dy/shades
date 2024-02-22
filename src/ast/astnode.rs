@@ -16,6 +16,7 @@ pub enum AstOperation {
     Subtract,
     Multiply,
     Divide,
+    Intlit,
     Invalid,
 }
 
@@ -33,13 +34,11 @@ impl AstNode {
         self.op.clone()
     }
 
-    pub fn get_intval(&self) -> usize {
-        self.intval
+    pub fn get_intval(&self) -> i64 {
+        self.intval as i64
     }
 
-    pub fn get_actual_intval(&self) -> u64 {
-        return self.intval as u64 - 48;
-    }
+    
     pub fn get_left_child(&self) -> Option<&Box<AstNode>> {
         self.left.as_ref()
     }

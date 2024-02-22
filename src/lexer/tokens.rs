@@ -1,14 +1,14 @@
 use crate::ast::astnode::AstOperation;
 use std::collections::VecDeque;
 // A token is a terminal symbol
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct Token {
     token_type: TokenTypes,
     value: usize,
 }
 
 // The token field can be any one of the following values
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug,Eq,Hash)]
 #[allow(non_camel_case_types)]
 pub enum TokenTypes {
     T_INTLIT,  // integer literal
@@ -16,10 +16,16 @@ pub enum TokenTypes {
     T_MINUS,   // minus symbol
     T_STAR,    // star symbol
     T_SLASH,   // slash symbol
+    T_PRINT,   // print keyword
+    T_FUNC,    // func keyword
+    T_STRUCT,  // struct keyword,
+    T_STRING,  // string keyword
+    T_SEMICOLON, // semicolon
     T_INVALID, // invalid token
     T_EOF,     // End of file
 }
 
+#[derive(Debug)]
 pub struct TokenList {
     tokens: VecDeque<Token>,
 }
@@ -33,18 +39,8 @@ impl TokenList {
     pub fn next(&mut self) -> Option<Token> {
         self.tokens.pop_front()
     }
-}
-impl TokenTypes {
-    pub fn to_string(&self) -> String {
-        match *self {
-            TokenTypes::T_INTLIT => "T_INTLIT".to_string(),
-            TokenTypes::T_PLUS => "T_PLUS".to_string(),
-            TokenTypes::T_MINUS => "T_MINUS".to_string(),
-            TokenTypes::T_STAR => "T_STAR".to_string(),
-            TokenTypes::T_SLASH => "T_SLASH".to_string(),
-            TokenTypes::T_INVALID => "INVALID".to_string(),
-            TokenTypes::T_EOF => "EOF".to_string(),
-        }
+    pub fn peek(&mut self)->Option<Token>{
+        self.tokens.front().cloned()
     }
 }
 
@@ -66,6 +62,7 @@ impl Token {
             '+' => token_type = TokenTypes::T_PLUS,
             '*' => token_type = TokenTypes::T_STAR,
             '/' => token_type = TokenTypes::T_SLASH,
+            ';' => token_type = TokenTypes::T_SEMICOLON,
             _ => {
                 token_value = token as usize;
                 if token.is_digit(10) {
@@ -90,6 +87,12 @@ impl Token {
         self.value
     }
 
+    pub fn set_type(&mut self,t:TokenTypes){
+        self.token_type = t;
+    }
+    pub fn set_value(&mut self,value:usize){
+        self.value = value;
+    }
     pub fn to_ast_operation(&self) -> AstOperation {
         let token_type = self.token_type.clone();
         match token_type {
@@ -97,6 +100,7 @@ impl Token {
             TokenTypes::T_MINUS => AstOperation::Subtract,
             TokenTypes::T_STAR => AstOperation::Multiply,
             TokenTypes::T_SLASH => AstOperation::Divide,
+            TokenTypes::T_INTLIT => AstOperation::Intlit,
             _ => AstOperation::Invalid,
         }
     }

@@ -4,3 +4,4 @@ mod asmgen;
 mod regops;
 mod x64;
 mod arm;
+mod irgenerator;

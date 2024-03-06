@@ -1,10 +1,12 @@
 use utils::file;
-use codegenerator::generator::generate_code;
+use codegen::generator::generate_code;
 use lexer::scanner::start_scanner;
 mod lexer;
 mod utils;
 mod ast;
-mod codegenerator;
+mod codegen;
+mod llvm_wrappers;
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {

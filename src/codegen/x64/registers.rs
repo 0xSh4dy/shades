@@ -1,4 +1,4 @@
-use crate::{codegenerator::regops::RegOperations, utils::errors::fatal_error};
+use crate::{codegen::regops::RegOperations, utils::errors::fatal_error};
 
 const GP_REG_COUNT: usize = 16;
 pub struct X64Registers<'a> {

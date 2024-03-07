@@ -1,1 +1,5 @@
-print 1+2+3;
+print 1+2+2;
+var x;
+var y;
+print 5+2*3;
+10+10+10;

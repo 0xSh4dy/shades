@@ -4,7 +4,7 @@ use inkwell::{context::Context, module::Module};
 use lazy_static::lazy_static;
 
 #[derive(PartialEq,Eq,Hash)]
-enum MathOps{
+pub enum MathOps{
     Add,
     Sub,
     Mul,
@@ -12,7 +12,7 @@ enum MathOps{
 }
 
 lazy_static!{
-    static ref FN_OPS : HashMap<MathOps,&'static str> = {
+    pub static ref FN_OPS : HashMap<MathOps,&'static str> = {
         let mut map = HashMap::new();
         map.insert(MathOps::Add,"shades_add");
         map.insert(MathOps::Sub,"shades_sub");
@@ -48,7 +48,6 @@ impl <'a,'b>MathCodeGenerator<'a,'b>{
             
             let first_param = function.get_first_param().unwrap().into_int_value();
             let second_param = function.get_nth_param(1).unwrap().into_int_value();
-            
             let result = match op {
                 MathOps::Add => builder.build_int_add(first_param, second_param, "sum").unwrap(),
                 MathOps::Sub => builder.build_int_sub(first_param, second_param, "diff").unwrap(),

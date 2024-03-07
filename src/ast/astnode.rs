@@ -97,7 +97,7 @@ pub fn create_primary_node(token: &Token) -> Box<AstNode> {
             return create_leaf_node(ast_op, token.get_value());
         }
         _ => {
-            fatal_error("Syntax error", 1);
+            fatal_error("Syntax error in AST", 1);
             return AstNode::new();
         }
     }

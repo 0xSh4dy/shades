@@ -1,34 +1,35 @@
-use inkwell::context::Context;
-
-use super::codeinterp::interpret_ast;
 use super::irgenerator::IrGenerator;
 use crate::ast::asttree::build_ast;
-use crate::lexer::keywords::match_keyword;
+use crate::lexer::keywords::matcher::{match_items, match_keyword};
 use crate::lexer::tokens::{TokenList, TokenTypes};
 use crate::llvm_wrappers::generators::funcgen::FuncGenerator;
+use inkwell::context::Context;
 
 pub fn generate_code(tokens: &mut TokenList) {
     let context = Context::create();
     let module = context.create_module("main");
+  
+    // Generate the shades_main function
+    let void_type = context.void_type();
+    let func_type = void_type.fn_type(&[], false);
+    let function = module.add_function("shades_main", func_type, None);
+    let basic_block = context.append_basic_block(function, "");
+
+    // Generate the main function
     let func_generator = FuncGenerator::new(&context, &module);
     func_generator.generate_c_main_function();
-    func_generator.generate_shades_main_function();
+
+    // Loop line-by-line
     loop {
         // Find whether the first token is print or not
-        match_keyword(tokens.next().unwrap().get_type());
-        let root = build_ast(tokens, 0);
-        let val = interpret_ast(root.as_ref());
-        println!("Result: {}", val);
-        println!("Generating Assembly..............");
-        // let mut x64regs = X64Registers::new();
-        // x64regs.func_preamble();
-        unsafe {
-            let ir_generator = IrGenerator::new(&context, module.clone());
-            ir_generator.generate_ir(root.as_ref());
-            // The main function is modified over here
-            // ir_generator.generate_ir(root.as_ref());
-            // ir_generator.perform_cleanup();
+        // match_keyword(tokens.next().unwrap().get_type());
+        match_items(tokens);
+        if tokens.peek().unwrap().get_type() == TokenTypes::T_EOF{
+            break;
         }
+        let root = build_ast(tokens, 0);
+        let ir_generator = IrGenerator::new(&context, &module, "shades_main");
+        ir_generator.generate_ir(root.as_ref());
         if let Some(tok) = tokens.peek() {
             if tok.get_type() == TokenTypes::T_SEMICOLON {
                 tokens.next();
@@ -39,17 +40,11 @@ pub fn generate_code(tokens: &mut TokenList) {
                 }
             }
         }
-        // generate_asm(root.as_ref(), &mut x64regs);
-        // if let Some(tok) = tokens.peek() {
-        //     if tok.get_type() == TokenTypes::T_SEMICOLON {
-        //         tokens.next();
-        //         if let Some(tok) = tokens.peek() {
-        //             if tok.get_type() == TokenTypes::T_EOF {
-        //                 break;
-        //             }
-        //         }
-        //     }
-        // }
-        // x64regs.func_postamble();
     }
+
+    // return void for shades_main
+    let builder = context.create_builder();
+    builder.position_at_end(basic_block);
+    builder.build_return(None).unwrap();
+    module.print_to_file("/tmp/main.ll").unwrap();
 }

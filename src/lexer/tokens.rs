@@ -15,13 +15,16 @@ pub enum TokenTypes {
     T_PLUS,    // plus symbol
     T_MINUS,   // minus symbol
     T_STAR,    // star symbol
-    T_SLASH,   // slash symbol
+    T_SLASH,   // slash symbol,
+    T_EQUAL,   // equal symbol,
     T_PRINT,   // print keyword
     T_FUNC,    // func keyword
     T_STRUCT,  // struct keyword,
     T_STRING,  // string keyword
+    T_VAR,     // var keyword
     T_SEMICOLON, // semicolon
     T_INVALID, // invalid token
+    T_IDENTIF, // identifier token
     T_EOF,     // End of file
 }
 
@@ -63,6 +66,7 @@ impl Token {
             '*' => token_type = TokenTypes::T_STAR,
             '/' => token_type = TokenTypes::T_SLASH,
             ';' => token_type = TokenTypes::T_SEMICOLON,
+            '=' => token_type = TokenTypes::T_EQUAL,
             _ => {
                 token_value = token as usize;
                 if token.is_digit(10) {

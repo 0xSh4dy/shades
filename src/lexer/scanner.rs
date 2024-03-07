@@ -1,4 +1,5 @@
-use crate::{lexer::keywords::get_keyword, utils::errors::throw_custom_error};
+use crate::{ utils::errors::throw_custom_error};
+use super::keywords::matcher::get_keyword;
 
 use super::tokens::{Token, TokenList, TokenTypes};
 // A tokenizer that extracts different tokens from an input string
@@ -91,7 +92,7 @@ impl Scanner {
             if val.is_alphabetic() {
                 let char_sequence = self.scan_char_sequence(val);
                 let keyword_token = get_keyword(&char_sequence);
-                if keyword_token == TokenTypes::T_PRINT {
+                if keyword_token != TokenTypes::T_INVALID {
                     token_to_push.set_type(keyword_token);
                 }
             }

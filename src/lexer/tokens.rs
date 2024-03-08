@@ -1,10 +1,16 @@
 use crate::ast::astnode::AstOperation;
 use std::collections::VecDeque;
+
+#[derive(Clone,Debug)]
+pub enum TokenValue{
+    Integer(usize),
+    String(String),
+}
 // A token is a terminal symbol
 #[derive(Clone,Debug)]
 pub struct Token {
     token_type: TokenTypes,
-    value: usize,
+    value: TokenValue,
 }
 
 // The token field can be any one of the following values
@@ -25,6 +31,8 @@ pub enum TokenTypes {
     T_SEMICOLON, // semicolon
     T_INVALID, // invalid token
     T_IDENTIF, // identifier token
+    T_LVIDENTIF, // lvalue identifier token
+    T_RVIDENTIF, // rvalue identifier token
     T_EOF,     // End of file
 }
 
@@ -52,7 +60,7 @@ impl Token {
     pub fn new_eof_token() -> Token {
         Token {
             token_type: TokenTypes::T_EOF,
-            value: 0,
+            value: TokenValue::Integer(0),
         }
     }
 
@@ -79,7 +87,7 @@ impl Token {
 
         Token {
             token_type,
-            value: token_value,
+            value: TokenValue::Integer(token_value),
         }
     }
 
@@ -87,14 +95,14 @@ impl Token {
         self.token_type.clone()
     }
 
-    pub fn get_value(&self) -> usize {
-        self.value
+    pub fn get_value(&self) -> TokenValue {
+        self.value.clone()
     }
 
     pub fn set_type(&mut self,t:TokenTypes){
         self.token_type = t;
     }
-    pub fn set_value(&mut self,value:usize){
+    pub fn set_value(&mut self,value:TokenValue){
         self.value = value;
     }
     pub fn to_ast_operation(&self) -> AstOperation {

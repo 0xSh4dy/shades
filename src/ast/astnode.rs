@@ -1,4 +1,4 @@
-use crate::lexer::tokens::{Token, TokenTypes};
+use crate::lexer::tokens::{Token, TokenTypes, TokenValue};
 use crate::utils::errors::fatal_error;
 
 #[derive(PartialEq)]
@@ -17,6 +17,7 @@ pub enum AstOperation {
     Multiply,
     Divide,
     Intlit,
+    Assign,
     Invalid,
 }
 
@@ -94,7 +95,10 @@ pub fn create_primary_node(token: &Token) -> Box<AstNode> {
     match token.get_type() {
         TokenTypes::T_INTLIT => {
             let ast_op = token.to_ast_operation();
-            return create_leaf_node(ast_op, token.get_value());
+            if let TokenValue::Integer(v) = token.get_value(){
+                return create_leaf_node(ast_op, v);
+            }
+            return create_leaf_node(ast_op,0);
         }
         _ => {
             fatal_error("Syntax error in AST", 1);

@@ -1,7 +1,7 @@
 use crate::{ utils::errors::throw_custom_error};
 use super::keywords::matcher::get_keyword;
 
-use super::tokens::{Token, TokenList, TokenTypes};
+use super::tokens::{Token, TokenList, TokenTypes,TokenValue};
 // A tokenizer that extracts different tokens from an input string
 pub struct Scanner {
     data: String,
@@ -84,22 +84,30 @@ impl Scanner {
         let mut token_to_push = token.clone();
 
         if token_type == TokenTypes::T_INTLIT {
-            let digit_string = self.scanint(token.get_value());
-            let int_value: usize = digit_string.parse()?;
-            token_to_push.set_value(int_value);
+            if let TokenValue::Integer(val) = token.get_value(){
+                let digit_string = self.scanint(val);
+                let int_value: usize = digit_string.parse()?;
+                token_to_push.set_value(TokenValue::Integer(int_value));
+            }
         } else if token_type == TokenTypes::T_INVALID {
-            let val = std::char::from_u32(token.get_value() as u32).unwrap();
-            if val.is_alphabetic() {
-                let char_sequence = self.scan_char_sequence(val);
-                let keyword_token = get_keyword(&char_sequence);
-                if keyword_token != TokenTypes::T_INVALID {
-                    token_to_push.set_type(keyword_token);
+            if let TokenValue::Integer(v) = token.get_value(){
+                let val = std::char::from_u32(v as u32).unwrap();
+                if val.is_alphabetic() {
+                    let char_sequence = self.scan_char_sequence(val);
+                    let keyword_token = get_keyword(&char_sequence);
+                    if keyword_token == TokenTypes::T_IDENTIF{
+                        token_to_push.set_value(TokenValue::String(char_sequence));
+                    }
+                    if keyword_token != TokenTypes::T_INVALID {
+                        token_to_push.set_type(keyword_token);
+                    }
+                }
+                else{
+                    let err_message = format!("Found invalid token {}", val);
+                    return Err(throw_custom_error(&err_message));
                 }
             }
-            else{
-                let err_message = format!("Found invalid token {}", val);
-                return Err(throw_custom_error(&err_message));
-            }
+            
         }
         self.tokens.push(token_to_push);
         Ok(())

@@ -1,1 +1,1 @@
-## Shades: a blazing fast programming languages, with the compiler written in Rust.
+## Shades: a blazing fast programming language, with the compiler written in Rust.

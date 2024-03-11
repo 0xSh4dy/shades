@@ -40,7 +40,6 @@ pub fn match_and_generate<'a, 'b>(
         let ir_gen = IrGenerator::new(&context, &module, "shades_main");
         let cur_token = tokens.peek().unwrap();
         let cur_token_type = cur_token.get_type();
-
         if cur_token_type == TokenTypes::T_VAR {
             tokens.next();
             handle_var_decl(tokens);
@@ -49,7 +48,6 @@ pub fn match_and_generate<'a, 'b>(
             ir_gen.handle_print_decl(tokens);
         } else if cur_token_type == TokenTypes::T_IDENTIF {
             ir_gen.handle_assignment(tokens);
-            break;
         } else if cur_token_type == TokenTypes::T_SEMICOLON{
             // Skip the semicolon
             tokens.next();

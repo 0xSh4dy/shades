@@ -31,8 +31,6 @@ pub enum TokenTypes {
     T_SEMICOLON, // semicolon
     T_INVALID, // invalid token
     T_IDENTIF, // identifier token
-    T_LVIDENTIF, // lvalue identifier token
-    T_RVIDENTIF, // rvalue identifier token
     T_EOF,     // End of file
 }
 
@@ -113,6 +111,7 @@ impl Token {
             TokenTypes::T_STAR => AstOperation::Multiply,
             TokenTypes::T_SLASH => AstOperation::Divide,
             TokenTypes::T_INTLIT => AstOperation::Intlit,
+            TokenTypes::T_IDENTIF => AstOperation::Lvident,
             _ => AstOperation::Invalid,
         }
     }

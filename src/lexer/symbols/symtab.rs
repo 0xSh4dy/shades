@@ -21,11 +21,16 @@ pub fn find_symbol(name:&str)->Option<usize>{
     guard.iter().position(|x|x.name == name)
 }
 
+pub fn get_corresp_symtab(slot:usize)->SymTab{
+    let read_guard = GLOB_SYMTAB.read().unwrap();
+    let symt = read_guard.get(slot).expect("Couldn't find the desired slot");
+    return symt.clone();
+}
 
 pub fn add_symbol(name:String)->Option<usize>{
     let val = {
         let read_guard = GLOB_SYMTAB.read().unwrap();
-        let idx = read_guard.iter().position(|x|x.name==name);
+        let idx = read_guard.iter().position(|x|x.name=="");
         idx
     };
     if let Some(idx) = val{
@@ -34,4 +39,10 @@ pub fn add_symbol(name:String)->Option<usize>{
         return Some(idx);
     }
     None
+}
+
+impl SymTab{
+    pub fn get_name(&self)->String{
+        return self.name.clone();
+    }
 }

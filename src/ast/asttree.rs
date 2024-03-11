@@ -11,8 +11,8 @@ pub fn in_order_traversal(root_node: Option<&Box<AstNode>>) {
         in_order_traversal((*node).get_left_child());
         let val = (*node).get_op();
         if val == AstOperation::Invalid {
-            let value = (*node).get_intval();
-            println!("{}", value);
+            let value = (*node).get_val();
+            println!("Invalid value {:?}", value);
         }
         in_order_traversal((*node).get_right_child());
     }

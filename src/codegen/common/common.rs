@@ -1,7 +1,7 @@
 use crate::{
-    ast::asttree::build_ast,
+    ast::{astnode::{create_leaf_node, AstNode, AstOperation, Value}, asttree::build_ast},
     codegen::irgenerator::IrGenerator,
-    lexer::tokens::{TokenList, TokenTypes},
+    lexer::{symbols::symtab::find_symbol, tokens::{TokenList, TokenTypes, TokenValue}},
     utils::errors::fatal_error,
 };
 
@@ -19,7 +19,21 @@ impl<'a, 'b> IrGenerator<'a, 'b> {
                 fatal_error("Syntax error in assignment", 1);
             }
         }
-        
+        tokens.next();
+        if let Some(cur_tok) = cur_token_opt{
+            if let TokenValue::String(val) = cur_tok.get_value(){
+                let find_stats = find_symbol(&val);
+                if let Some(idx) = find_stats{
+                    let right = create_leaf_node(AstOperation::Lvident, Value::SlotNumber(idx));
+                    let left = build_ast(tokens, 0);
+                    let root = AstNode::create(AstOperation::Assign, left, Some(right), 0);
+                    self.generate_ir(Some(root).as_ref());
+                }
+                else{
+                    fatal_error(&format!("Undeclared variable {}",val), 1)
+                }
+            }
+        }
         // if let Some(cur_token) = cur_token_opt{
         //     if cur_token.get_type() == TokenTypes::T_EQUAL{
         //         let root = build_ast(tokens,0);

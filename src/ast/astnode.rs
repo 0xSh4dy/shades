@@ -1,12 +1,18 @@
+use crate::lexer::symbols::symtab::find_symbol;
 use crate::lexer::tokens::{Token, TokenTypes, TokenValue};
 use crate::utils::errors::fatal_error;
 
+#[derive(PartialEq,Debug,Clone)]
+pub enum Value{
+    Intval(usize),
+    SlotNumber(usize),
+}
 #[derive(PartialEq)]
 pub struct AstNode {
     op: AstOperation,
     left: Option<Box<AstNode>>,
     right: Option<Box<AstNode>>,
-    intval: usize, // For integer value
+    val: Value, // For integer value,
 }
 
 // A type of AST Operation
@@ -18,6 +24,7 @@ pub enum AstOperation {
     Divide,
     Intlit,
     Assign,
+    Lvident,
     Invalid,
 }
 
@@ -27,7 +34,7 @@ impl AstNode {
             op: AstOperation::Invalid,
             left: None,
             right: None,
-            intval: 0,
+            val: Value::Intval(0),
         });
     }
 
@@ -35,8 +42,8 @@ impl AstNode {
         self.op.clone()
     }
 
-    pub fn get_intval(&self) -> i64 {
-        self.intval as i64
+    pub fn get_val(&self) -> Value {
+        return self.val.clone();
     }
 
     
@@ -62,17 +69,17 @@ impl AstNode {
             op,
             left,
             right,
-            intval,
+            val:Value::Intval(intval),
         })
     }
 }
 
-pub fn create_leaf_node(op: AstOperation, intval: usize) -> Box<AstNode> {
+pub fn create_leaf_node(op: AstOperation, val: Value) -> Box<AstNode> {
     Box::new(AstNode {
         op: op,
         left: None,
         right: None,
-        intval: intval,
+        val,
     })
 }
 
@@ -86,7 +93,7 @@ pub fn create_unary_node(
         op: op,
         left: left,
         right: None,
-        intval: intval,
+        val: Value::Intval(intval),
     })
 }
 
@@ -96,12 +103,22 @@ pub fn create_primary_node(token: &Token) -> Box<AstNode> {
         TokenTypes::T_INTLIT => {
             let ast_op = token.to_ast_operation();
             if let TokenValue::Integer(v) = token.get_value(){
-                return create_leaf_node(ast_op, v);
+                return create_leaf_node(ast_op, Value::Intval(v));
             }
-            return create_leaf_node(ast_op,0);
-        }
+            return create_leaf_node(ast_op,Value::Intval(0));
+        },
+        TokenTypes::T_IDENTIF => {
+           let ast_op = token.to_ast_operation();
+           if let TokenValue::String(x) = token.get_value(){
+                let sym_off = find_symbol(&x).expect("Symbol lookup failed");
+                return create_leaf_node(ast_op,Value::SlotNumber(sym_off));
+           }
+           fatal_error("Error in create_primary_node", 1);
+           return create_leaf_node(ast_op,Value::SlotNumber(0));
+        },
         _ => {
-            fatal_error("Syntax error in AST", 1);
+            let err = format!("Syntax error in AST: Invalid token {:?}",token.get_type());
+            fatal_error(&err, 1);
             return AstNode::new();
         }
     }

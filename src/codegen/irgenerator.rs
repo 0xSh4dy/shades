@@ -1,14 +1,16 @@
 use crate::{
     ast::astnode::{AstNode, AstOperation, Value},
     lexer::symbols::symtab::get_corresp_symtab,
-    llvm_wrappers::generators::mathgen::{MathCodeGenerator, MathOps, FN_OPS},
+    llvm_wrappers::generators::mathgen::{ast_op_to_mathop, MathCodeGenerator, MathOps, FN_OPS},
     utils::errors::fatal_error,
 };
 use inkwell::{
+    builder::Builder,
     context::Context,
     module::{Linkage, Module},
     types::IntType,
-    values::{BasicValue, FunctionValue, IntValue},
+    values::{BasicValue, BasicValueEnum, FunctionValue, IntValue},
+    IntPredicate,
 };
 
 pub struct IrGenerator<'a, 'b> {
@@ -107,6 +109,16 @@ impl<'a, 'b> IrGenerator<'a, 'b> {
                         .left()
                         .unwrap()
                         .into_int_value();
+                } else if op == AstOperation::LessThan
+                    || op == AstOperation::LessThanEq
+                    || op == AstOperation::Equal
+                    || op == AstOperation::NotEqual
+                    || op == AstOperation::GreaterThan
+                    || op == AstOperation::GreaterThanEq
+                {
+                    math_gen.generate_cmp_func(&op);
+                    retval =
+                        build_call_for_cmp(&self.module, &builder, right_val.into(), left_val, &op);
                 } else if op == AstOperation::Assign {
                     retval = self.context.i64_type().const_int(0, false);
                     let slot_num = right_val.get_sign_extended_constant().unwrap();
@@ -140,4 +152,24 @@ impl<'a, 'b> IrGenerator<'a, 'b> {
             return (self.context.i64_type().const_int(0, false), false);
         }
     }
+}
+
+pub fn build_call_for_cmp<'a: 'b, 'b>(
+    module: &Module<'a>,
+    builder: &Builder<'b>,
+    lhs: BasicValueEnum<'b>,
+    rhs: BasicValueEnum<'b>,
+    op: &AstOperation,
+) -> IntValue<'b> {
+    let math_op = ast_op_to_mathop(op);
+    let fn_name = FN_OPS.get(&math_op).unwrap();
+    let cmp_fn = module.get_function(fn_name).unwrap();
+    let retval = builder
+        .build_call(cmp_fn, &[lhs.into(), rhs.into()], "cmp_retval")
+        .expect("build_call_for_cmp failed")
+        .try_as_basic_value()
+        .left()
+        .expect("build_call_for_cmp failed")
+        .into_int_value();
+    return retval;
 }

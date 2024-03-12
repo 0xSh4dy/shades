@@ -31,7 +31,7 @@ pub fn get_keyword(s: &str) -> TokenTypes {
     return TokenTypes::T_IDENTIF;
 }
 
-pub fn match_and_generate<'a, 'b>(
+pub fn match_and_generate<'a,'b>(
     tokens: &mut TokenList,
     context: &'a Context,
     module: &'b Module<'a>,

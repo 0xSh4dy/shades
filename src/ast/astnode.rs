@@ -25,6 +25,12 @@ pub enum AstOperation {
     Intlit,
     Assign,
     Lvident,
+    LessThan,
+    GreaterThan,
+    LessThanEq,
+    GreaterThanEq,
+    Equal,
+    NotEqual,
     Invalid,
 }
 

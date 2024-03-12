@@ -1,6 +1,12 @@
-var varTwo;
 var varOne;
-varOne = 10+10*2+10+8;
-varTwo = varOne+5;
+var varTwo;
 var varThree;
-varThree = varTwo*10;
+var varFour;
+var varFive;
+var varSix;
+varOne = 4>5;
+varTwo = 4==3;
+varThree = 5<=10;
+varFour = 5>2;
+varFive = 5!=5;
+varSix = 5!=10;

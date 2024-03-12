@@ -31,6 +31,13 @@ pub enum TokenTypes {
     T_SEMICOLON, // semicolon
     T_INVALID, // invalid token
     T_IDENTIF, // identifier token
+    T_CEQ, // ==
+    T_NEQ, // !=
+    T_GT,  // >
+    T_LT,  // <
+    T_GTEQ, // >=
+    T_LTEQ, // <=
+    T_NOT, // !
     T_EOF,     // End of file
 }
 
@@ -73,6 +80,9 @@ impl Token {
             '/' => token_type = TokenTypes::T_SLASH,
             ';' => token_type = TokenTypes::T_SEMICOLON,
             '=' => token_type = TokenTypes::T_EQUAL,
+            '<' => token_type = TokenTypes::T_LT,
+            '>' => token_type = TokenTypes::T_GT,
+            '!' => token_type = TokenTypes::T_NOT,
             _ => {
                 token_value = token as usize;
                 if token.is_digit(10) {
@@ -89,6 +99,27 @@ impl Token {
         }
     }
 
+    pub fn new_multichar_token(chars:&str)->Token{
+        let mut token_type = TokenTypes::T_INVALID;
+        let token_value:usize = 0;
+
+        if chars == "=="{
+            token_type = TokenTypes::T_CEQ;
+        }
+        else if chars == "!="{
+            token_type = TokenTypes::T_NEQ
+        }
+        else if chars == ">="{
+            token_type = TokenTypes::T_GTEQ;
+        }
+        else if chars == "<="{
+            token_type = TokenTypes::T_LTEQ;
+        }
+        return Token{
+            token_type:token_type,
+            value:TokenValue::Integer(token_value)
+        };
+    }
     pub fn get_type(&self) -> TokenTypes {
         self.token_type.clone()
     }
@@ -111,6 +142,12 @@ impl Token {
             TokenTypes::T_STAR => AstOperation::Multiply,
             TokenTypes::T_SLASH => AstOperation::Divide,
             TokenTypes::T_INTLIT => AstOperation::Intlit,
+            TokenTypes::T_CEQ => AstOperation::Equal ,
+            TokenTypes::T_GT => AstOperation::GreaterThan,
+            TokenTypes::T_LT => AstOperation::LessThan,
+            TokenTypes::T_LTEQ => AstOperation::LessThanEq,
+            TokenTypes::T_NEQ => AstOperation::NotEqual,
+            TokenTypes::T_GTEQ => AstOperation::GreaterThanEq,
             TokenTypes::T_IDENTIF => AstOperation::Lvident,
             _ => AstOperation::Invalid,
         }

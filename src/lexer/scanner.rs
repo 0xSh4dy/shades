@@ -25,7 +25,36 @@ impl Scanner {
     fn get_next_token(&mut self) -> Token {
         loop {
             let res = self.data.chars().nth(self.cur_idx).unwrap();
+            let next_chr = self.data.chars().nth(self.cur_idx+1);
             if !res.is_whitespace() {
+                if res == '='{
+                    next_chr.expect("Failed to fetch the next char after =");
+                    if next_chr == Some('='){
+                        self.advance();
+                        return Token::new_multichar_token("==");
+                    }
+                }
+                else if res == '>'{
+                    next_chr.expect("Failed to fetch the next char after >");
+                    if next_chr == Some('='){
+                        self.advance();
+                        return Token::new_multichar_token(">=");
+                    }
+                }
+                else if res == '<'{
+                    next_chr.expect("Failed to fetch next char after <");
+                    if next_chr == Some('='){
+                        self.advance();
+                        return Token::new_multichar_token(">=");
+                    }
+                }
+                else if res == '!'{
+                    next_chr.expect("Failed to fetch next char after !");
+                    if next_chr == Some('='){
+                        self.advance();
+                        return Token::new_multichar_token("!=");
+                    }
+                }
                 return Token::new(res);
             }
             self.advance()

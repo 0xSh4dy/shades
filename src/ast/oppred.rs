@@ -10,10 +10,16 @@ struct OperatorPrecedence{
 impl OperatorPrecedence{
     pub fn new()->OperatorPrecedence{
         let mut data_map:HashMap<TokenTypes,i32> = HashMap::new();
-        data_map.insert(TokenTypes::T_PLUS,10);
-        data_map.insert(TokenTypes::T_MINUS,10);
-        data_map.insert(TokenTypes::T_STAR,20);
-        data_map.insert(TokenTypes::T_SLASH,20);
+        data_map.insert(TokenTypes::T_PLUS,30);
+        data_map.insert(TokenTypes::T_MINUS,30);
+        data_map.insert(TokenTypes::T_STAR,50);
+        data_map.insert(TokenTypes::T_SLASH,50);
+        data_map.insert(TokenTypes::T_LT,5);
+        data_map.insert(TokenTypes::T_LTEQ,5);
+        data_map.insert(TokenTypes::T_GT,5);
+        data_map.insert(TokenTypes::T_GTEQ,5);
+        data_map.insert(TokenTypes::T_CEQ,10);
+        data_map.insert(TokenTypes::T_NEQ,10);
 
         OperatorPrecedence { data: data_map }
     }

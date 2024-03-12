@@ -4,11 +4,12 @@ use crate::lexer::keywords::matcher::{match_and_generate};
 use crate::lexer::tokens::{TokenList, TokenTypes};
 use crate::llvm_wrappers::generators::funcgen::FuncGenerator;
 use inkwell::context::Context;
+use lazy_static::lazy_static;
+
 
 pub fn generate_code(tokens: &mut TokenList) {
     let context = Context::create();
     let module = context.create_module("main");
-  
     // Generate the shades_main function
     let void_type = context.void_type();
     let func_type = void_type.fn_type(&[], false);
@@ -18,7 +19,6 @@ pub fn generate_code(tokens: &mut TokenList) {
     // Generate the main function
     let func_generator = FuncGenerator::new(&context, &module);
     func_generator.generate_c_main_function();
-
     // Loop line-by-line
     // loop {
         // Find whether the first token is print or not

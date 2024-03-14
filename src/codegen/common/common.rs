@@ -1,13 +1,13 @@
 use crate::{
-    ast::{astnode::{create_leaf_node, AstNode, AstOperation, Value}, asttree::build_ast},
+    ast::{astnode::{create_leaf_node, AstNode, AstOperation, Value}, asttree::build_expression_tree},
     codegen::irgenerator::IrGenerator,
-    lexer::{symbols::symtab::find_symbol, tokens::{TokenList, TokenTypes, TokenValue}},
+    lexer::{symbols::symtab::find_symbol, scanner::tokens::{TokenList, TokenTypes, TokenValue}},
     utils::errors::fatal_error,
 };
 
 impl<'a, 'b> IrGenerator<'a, 'b> {
     pub fn handle_print_decl(&self, tokens: &mut TokenList) {
-        let root = build_ast(tokens, 0);
+        let root = build_expression_tree(tokens, 0);
         self.generate_ir(root.as_ref());
     }
     pub fn handle_assignment(&self, tokens: &mut TokenList) {
@@ -25,7 +25,7 @@ impl<'a, 'b> IrGenerator<'a, 'b> {
                 let find_stats = find_symbol(&val);
                 if let Some(idx) = find_stats{
                     let right = create_leaf_node(AstOperation::Lvident, Value::SlotNumber(idx));
-                    let left = build_ast(tokens, 0);
+                    let left = build_expression_tree(tokens, 0);
                     let root = AstNode::create(AstOperation::Assign, left, Some(right), 0);
                     self.generate_ir(Some(root).as_ref());
                 }

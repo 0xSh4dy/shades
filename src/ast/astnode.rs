@@ -1,5 +1,5 @@
 use crate::lexer::symbols::symtab::find_symbol;
-use crate::lexer::tokens::{Token, TokenTypes, TokenValue};
+use crate::lexer::scanner::tokens::{Token, TokenTypes, TokenValue};
 use crate::utils::errors::fatal_error;
 
 #[derive(PartialEq,Debug,Clone)]
@@ -16,7 +16,7 @@ pub struct AstNode {
 }
 
 // A type of AST Operation
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq,PartialOrd)]
 pub enum AstOperation {
     Add,
     Subtract,
@@ -31,6 +31,7 @@ pub enum AstOperation {
     GreaterThanEq,
     Equal,
     NotEqual,
+    Print,
     Invalid,
 }
 

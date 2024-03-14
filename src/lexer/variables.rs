@@ -1,8 +1,10 @@
 use crate::utils::errors::fatal_error;
 
-use super::{symbols::symtab::add_symbol, tokens::{Token, TokenList, TokenTypes, TokenValue}};
+use super::{scanner::{matcher::match_token, tokens::{ TokenList, TokenTypes, TokenValue}}, symbols::symtab::add_symbol};
 
 pub fn handle_var_decl(tokens:&mut TokenList){
+    // Must be a var token
+    match_token(&tokens.next(), TokenTypes::T_VAR);
     // The next token must be an identifier;
     let next_token_opt = tokens.next();
     if let Some(next_token) = next_token_opt{

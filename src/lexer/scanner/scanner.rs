@@ -1,5 +1,5 @@
 use crate::{ utils::errors::throw_custom_error};
-use super::keywords::matcher::get_keyword;
+use super::matcher::get_keyword;
 
 use super::tokens::{Token, TokenList, TokenTypes,TokenValue};
 // A tokenizer that extracts different tokens from an input string

@@ -1,11 +1,7 @@
-use super::irgenerator::IrGenerator;
-use crate::ast::asttree::build_ast;
-use crate::lexer::keywords::matcher::{match_and_generate};
-use crate::lexer::tokens::{TokenList, TokenTypes};
+use crate::lexer::scanner::tokens::TokenList;
 use crate::llvm_wrappers::generators::funcgen::FuncGenerator;
 use inkwell::context::Context;
-use lazy_static::lazy_static;
-
+use crate::lexer::scanner::mainloop::handle_compound_statement;
 
 pub fn generate_code(tokens: &mut TokenList) {
     let context = Context::create();
@@ -19,28 +15,9 @@ pub fn generate_code(tokens: &mut TokenList) {
     // Generate the main function
     let func_generator = FuncGenerator::new(&context, &module);
     func_generator.generate_c_main_function();
-    // Loop line-by-line
-    // loop {
-        // Find whether the first token is print or not
-        // match_keyword(tokens.next().unwrap().get_type());
-        match_and_generate(tokens,&context,&module);
-        // if tokens.peek().unwrap().get_type() == TokenTypes::T_EOF{
-        //     break;
-        // }
-        // let root = build_ast(tokens, 0);
-        // let ir_generator = IrGenerator::new(&context, &module, "shades_main");
-        // ir_generator.generate_ir(root.as_ref());
-        // if let Some(tok) = tokens.peek() {
-        //     if tok.get_type() == TokenTypes::T_SEMICOLON {
-        //         tokens.next();
-        //         if let Some(tok) = tokens.peek() {
-        //             if tok.get_type() == TokenTypes::T_EOF {
-        //                 break;
-        //             }
-        //         }
-        //     }
-        // }
-    // }
+
+    // Match a compound statement
+    handle_compound_statement(tokens, &context, &module);
 
     // return void for shades_main
     let builder = context.create_builder();

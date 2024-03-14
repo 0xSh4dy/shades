@@ -22,7 +22,7 @@ pub enum TokenTypes {
     T_MINUS,   // minus symbol
     T_STAR,    // star symbol
     T_SLASH,   // slash symbol,
-    T_EQUAL,   // equal symbol,
+    T_EQUAL,   // equal symbol (=),
     T_PRINT,   // print keyword
     T_FUNC,    // func keyword
     T_STRUCT,  // struct keyword,
@@ -31,6 +31,11 @@ pub enum TokenTypes {
     T_SEMICOLON, // semicolon
     T_INVALID, // invalid token
     T_IDENTIF, // identifier token
+    T_IF, // if
+    T_ELSE, // else
+    T_FOR, // for loop
+    T_LOOP, // infinite loop
+    T_BREAK, // break statement
     T_CEQ, // ==
     T_NEQ, // !=
     T_GT,  // >
@@ -38,6 +43,10 @@ pub enum TokenTypes {
     T_GTEQ, // >=
     T_LTEQ, // <=
     T_NOT, // !
+    T_LSMBRACE, // (
+    T_RSMBRACE, // )
+    T_LBRACE, // {
+    T_RBRACE, // }
     T_EOF,     // End of file
 }
 
@@ -83,6 +92,10 @@ impl Token {
             '<' => token_type = TokenTypes::T_LT,
             '>' => token_type = TokenTypes::T_GT,
             '!' => token_type = TokenTypes::T_NOT,
+            '(' => token_type = TokenTypes::T_LSMBRACE,
+            ')' => token_type = TokenTypes::T_RSMBRACE,
+            '{' => token_type = TokenTypes::T_LBRACE,
+            '}' => token_type = TokenTypes::T_RBRACE,
             _ => {
                 token_value = token as usize;
                 if token.is_digit(10) {

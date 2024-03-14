@@ -1,6 +1,6 @@
 use utils::file;
 use codegen::generator::generate_code;
-use lexer::scanner::start_scanner;
+use lexer::scanner::scanner::start_scanner;
 mod lexer;
 mod utils;
 mod ast;

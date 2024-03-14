@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{lexer::tokens::TokenTypes, utils::errors::fatal_error};
+use crate::{lexer::scanner::tokens::TokenTypes, utils::errors::fatal_error};
 
 struct OperatorPrecedence{
     data:HashMap<TokenTypes,i32>

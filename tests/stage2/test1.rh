@@ -1,12 +1,2 @@
-var varOne;
-var varTwo;
-var varThree;
-var varFour;
-var varFive;
-var varSix;
-varOne = 4>5;
-varTwo = 4==3;
-varThree = 5<=10;
-varFour = 5>2;
-varFive = 5!=5;
-varSix = 5!=10;
+{
+}

@@ -28,7 +28,8 @@ impl OperatorPrecedence{
         match res{
             Some(val)=>return val,
             None => {
-                fatal_error("Syntax error 1", 1);
+                let msg = format!("syntax error: got invalid token {:?}",token_type);
+                fatal_error(&msg, 1);
                 return -1;
             }
         }
@@ -36,6 +37,7 @@ impl OperatorPrecedence{
 }
 
 pub fn get_precedence(token_type:TokenTypes)->Option<i32>{
+    println!("Calling get_precedence");
     let op_pred = OperatorPrecedence::new();
     Some(op_pred.get_precedence(token_type))
 }

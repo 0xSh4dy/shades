@@ -26,7 +26,7 @@ impl<'a, 'b> IrGenerator<'a, 'b> {
                 if let Some(idx) = find_stats{
                     let right = create_leaf_node(AstOperation::Lvident, Value::SlotNumber(idx));
                     let left = build_expression_tree(tokens, 0);
-                    let root = AstNode::create(AstOperation::Assign, left, Some(right), 0);
+                    let root = AstNode::create(AstOperation::Assign, left,None, Some(right), 0);
                     self.generate_ir(Some(root).as_ref());
                 }
                 else{

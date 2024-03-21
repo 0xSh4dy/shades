@@ -7,10 +7,11 @@ pub enum Value{
     Intval(usize),
     SlotNumber(usize),
 }
-#[derive(PartialEq)]
+#[derive(PartialEq,Clone,Debug)]
 pub struct AstNode {
     op: AstOperation,
     left: Option<Box<AstNode>>,
+    mid: Option<Box<AstNode>>,
     right: Option<Box<AstNode>>,
     val: Value, // For integer value,
 }
@@ -32,6 +33,8 @@ pub enum AstOperation {
     Equal,
     NotEqual,
     Print,
+    Glue,
+    If,
     Invalid,
 }
 
@@ -40,6 +43,7 @@ impl AstNode {
         return Box::new(AstNode {
             op: AstOperation::Invalid,
             left: None,
+            mid: None,
             right: None,
             val: Value::Intval(0),
         });
@@ -69,12 +73,14 @@ impl AstNode {
     pub fn create(
         op: AstOperation,
         left: Option<Box<AstNode>>,
+        mid: Option<Box<AstNode>>,
         right: Option<Box<AstNode>>,
         intval: usize,
     ) -> Box<AstNode> {
         Box::new(AstNode {
             op,
             left,
+            mid,
             right,
             val:Value::Intval(intval),
         })
@@ -85,6 +91,7 @@ pub fn create_leaf_node(op: AstOperation, val: Value) -> Box<AstNode> {
     Box::new(AstNode {
         op: op,
         left: None,
+        mid:None,
         right: None,
         val,
     })
@@ -99,6 +106,7 @@ pub fn create_unary_node(
     Box::new(AstNode {
         op: op,
         left: left,
+        mid:None,
         right: None,
         val: Value::Intval(intval),
     })

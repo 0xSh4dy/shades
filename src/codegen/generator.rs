@@ -17,7 +17,7 @@ pub fn generate_code(tokens: &mut TokenList) {
     func_generator.generate_c_main_function();
 
     // Match a compound statement
-    handle_compound_statement(tokens, &context, &module);
+    handle_compound_statement(tokens);
 
     // return void for shades_main
     let builder = context.create_builder();

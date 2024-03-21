@@ -1,40 +1,64 @@
 use inkwell::{context::Context, module::Module};
 
-use crate::{ast::asttree::{build_assignment_tree, build_if_tree, build_print_tree}, lexer::variables::handle_var_decl};
+use crate::{
+    ast::{
+        astnode::{AstNode, AstOperation},
+        asttree::{build_assignment_tree, build_if_tree, build_print_tree},
+    },
+    lexer::variables::handle_var_decl,
+};
 
-use super::{matcher::match_lbrace, tokens::{TokenList, TokenTypes}};
+use super::{
+    matcher::match_lbrace,
+    tokens::{TokenList, TokenTypes},
+};
 
-pub fn handle_compound_statement<'a,'b>(
-    tokens:&mut TokenList,
-    context:&'a  Context,
-    module:&'b Module<'a>
-){
+pub fn handle_compound_statement<'a, 'b>(
+    tokens: &mut TokenList,
+) -> Option<Box<AstNode>> {
+    let mut tree: Option<Box<AstNode>> = None;
+    let mut left: Option<Box<AstNode>> = None;
     match_lbrace(tokens);
-    loop{
+    loop {
         let cur_tok_opt = tokens.peek();
-        if let Some(cur_tok) = cur_tok_opt{
+        if let Some(cur_tok) = cur_tok_opt {
             let token_type = cur_tok.get_type();
-            match token_type{
+            match token_type {
                 TokenTypes::T_PRINT => {
-                    build_print_tree(tokens);
-                },
+                    println!("Generating tree for print");
+                    tree = Some(build_print_tree(tokens));
+                }
                 TokenTypes::T_IF => {
-                    build_if_tree(tokens);
-                },
+                    println!("Generating tree for if");
+                    tree = Some(build_if_tree(tokens));
+                }
                 TokenTypes::T_VAR => {
+                    println!("Handling variable declaration");
                     handle_var_decl(tokens);
-                },
+                }
                 TokenTypes::T_IDENTIF => {
-                    build_assignment_tree(tokens);
-                },
+                    println!("Generating assignment tree");
+                    tree = Some(build_assignment_tree(tokens));
+                }
                 TokenTypes::T_RBRACE => {
-
-                },
-                _ => {}
+                    println!("{:#?}",tree);
+                    return tree;
+                }
+                _ => {
+                    println!("{:?}",token_type);
+                    panic!("detected syntax error when building AST")
+                }
+            }
+        } else {
+            panic!("encountered unexpected error when building tree for compound statements")
+        }
+        if let Some(tree_node) = tree.clone() {
+            if let Some(left_node) = left {
+                left = Some(AstNode::create(AstOperation::Glue, Some(left_node), None, Some(tree_node), 0));
+            } else {
+                left = Some(tree_node);
             }
         }
-        else{
-            break;
-        }
     }
+
 }

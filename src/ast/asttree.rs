@@ -1,8 +1,7 @@
 use crate::{
     lexer::{
         scanner::{
-            matcher::match_token,
-            tokens::{TokenList, TokenTypes, TokenValue},
+            mainloop::handle_compound_statement, matcher::match_token, tokens::{TokenList, TokenTypes, TokenValue}
         },
         symbols::symtab::find_symbol,
     },
@@ -37,15 +36,22 @@ pub fn build_expression_tree(tokens: &mut TokenList, prev_oppred: i32) -> Option
         let mut left = create_primary_node(&left_token);
         if let Some(mut next_tok) = tokens.peek() {
             let next_tok_type = next_tok.get_type();
-            if next_tok_type == TokenTypes::T_SEMICOLON || next_tok_type == TokenTypes::T_LSMBRACE {
+            if next_tok_type == TokenTypes::T_SEMICOLON  {
+                // tokens.next();
+                println!("Found {:?}",next_tok_type);
+                return Some(left);
+            }else if next_tok_type == TokenTypes::T_RSMBRACE{
+                println!("Returning");
+                println!("{:?}",left);
                 return Some(left);
             }
+            println!("Reached here");
             while let Some(curr_pred) = get_precedence(next_tok.get_type()) {
                 if curr_pred > prev_oppred {
                     tokens.next();
                     let right = build_expression_tree(tokens, curr_pred);
                     let op = next_tok.to_ast_operation();
-                    left = AstNode::create(op, Some(left), right, 0);
+                    left = AstNode::create(op, Some(left),None, right, 0);
                     if let Some(x) = tokens.peek() {
                         if x.get_type() == TokenTypes::T_SEMICOLON {
                             return Some(left);
@@ -84,7 +90,8 @@ pub fn build_assignment_tree(tokens: &mut TokenList) -> Box<AstNode> {
             match_token(&tokens.next(), TokenTypes::T_EQUAL);
             let right = create_leaf_node(AstOperation::Lvident, Value::SlotNumber(idx));
             let left = build_expression_tree(tokens, 0);
-            let tree = AstNode::create(AstOperation::Assign, left, Some(right), 0);
+            let tree = AstNode::create(AstOperation::Assign, left,None, Some(right), 0);
+            match_token(&tokens.next(),TokenTypes::T_SEMICOLON);
             return tree;
         } else {
             fatal_error(&format!("Use of undeclared variable {}", var_name), 1);
@@ -93,16 +100,32 @@ pub fn build_assignment_tree(tokens: &mut TokenList) -> Box<AstNode> {
     panic!("Error! Couldn't build the assignment AST");
 }
 
-pub fn build_if_tree(tokens: &mut TokenList) {
+pub fn build_if_tree(tokens: &mut TokenList) ->Box<AstNode>{
     match_token(&tokens.next(), TokenTypes::T_IF);
     match_token(&tokens.next(), TokenTypes::T_LSMBRACE);
+    
     let expr_tree_opt = build_expression_tree(tokens, 0);
+    println!("Just below lmao");
     if let Some(expr_tree) = expr_tree_opt {
         let op = expr_tree.get_op();
         if op < AstOperation::LessThan || op > AstOperation::NotEqual {
             fatal_error("Invalid comparison",1);
         }
         match_token(&tokens.next(),TokenTypes::T_RSMBRACE);
-        
+        let if_tree = handle_compound_statement(tokens);
+        let next_token_opt = tokens.peek();
+        println!("Next token is {:?}",next_token_opt);
+        if let Some(next_token) = next_token_opt{
+            if next_token.get_type() == TokenTypes::T_ELSE{
+                let else_tree = handle_compound_statement(tokens);
+                return AstNode::create(AstOperation::If, Some(expr_tree), if_tree, else_tree,0)
+            }
+            return AstNode::create(AstOperation::If,Some(expr_tree),if_tree,None,0);
+        }else{
+            panic!("build_if_tree: failed to fetch next token");
+        }
+    }
+    else{
+        panic!("build_if_tree: failed to generate expression tree");
     }
 }

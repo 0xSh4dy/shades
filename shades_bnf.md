@@ -77,6 +77,15 @@ if_head : 'if' '(' boolean_expression ')' compound_statement;
 identifier : T_IDENTIF;
 ```
 
+### Tree for if
+```
+left:   condition
+mid:    if block
+right:  else block
+```
+### BNF for while loops
+
+while_statement: 'while' '(' true_false_expression ')' compound_statement
 
 
 ### Types of AST Nodes

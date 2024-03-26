@@ -37,7 +37,6 @@ impl OperatorPrecedence{
 }
 
 pub fn get_precedence(token_type:TokenTypes)->Option<i32>{
-    println!("Calling get_precedence");
     let op_pred = OperatorPrecedence::new();
     Some(op_pred.get_precedence(token_type))
 }

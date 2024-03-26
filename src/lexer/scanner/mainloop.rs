@@ -3,13 +3,13 @@ use inkwell::{context::Context, module::Module};
 use crate::{
     ast::{
         astnode::{AstNode, AstOperation},
-        asttree::{build_assignment_tree, build_if_tree, build_print_tree},
+        asttree::{build_assignment_tree, build_if_tree, build_print_tree, build_while_tree},
     },
     lexer::variables::handle_var_decl,
 };
 
 use super::{
-    matcher::match_lbrace,
+    matcher::{match_lbrace, match_token},
     tokens::{TokenList, TokenTypes},
 };
 
@@ -32,6 +32,10 @@ pub fn handle_compound_statement<'a, 'b>(
                     println!("Generating tree for if");
                     tree = Some(build_if_tree(tokens));
                 }
+                TokenTypes::T_WHILE => {
+                    println!("Generating tree for while");
+                    tree = Some(build_while_tree(tokens));
+                }
                 TokenTypes::T_VAR => {
                     println!("Handling variable declaration");
                     handle_var_decl(tokens);
@@ -41,8 +45,8 @@ pub fn handle_compound_statement<'a, 'b>(
                     tree = Some(build_assignment_tree(tokens));
                 }
                 TokenTypes::T_RBRACE => {
-                    println!("{:#?}",tree);
-                    return tree;
+                    tokens.next();
+                    return left;
                 }
                 _ => {
                     println!("{:?}",token_type);

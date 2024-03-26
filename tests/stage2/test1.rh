@@ -1,5 +1,14 @@
 {
-    if(1==2){
-        
+    var x;
+    x = 20;
+    if(5<2){
+        x = x+50;
+        print(x);
+    }
+    else{
+        x = x+100;
+        print(x);
+        x = x+80;
+        print(x);
     }
 }

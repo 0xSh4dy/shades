@@ -38,14 +38,11 @@ pub fn build_expression_tree(tokens: &mut TokenList, prev_oppred: i32) -> Option
             let next_tok_type = next_tok.get_type();
             if next_tok_type == TokenTypes::T_SEMICOLON  {
                 // tokens.next();
-                println!("Found {:?}",next_tok_type);
                 return Some(left);
             }else if next_tok_type == TokenTypes::T_RSMBRACE{
-                println!("Returning");
                 println!("{:?}",left);
                 return Some(left);
             }
-            println!("Reached here");
             while let Some(curr_pred) = get_precedence(next_tok.get_type()) {
                 if curr_pred > prev_oppred {
                     tokens.next();
@@ -53,7 +50,7 @@ pub fn build_expression_tree(tokens: &mut TokenList, prev_oppred: i32) -> Option
                     let op = next_tok.to_ast_operation();
                     left = AstNode::create(op, Some(left),None, right, 0);
                     if let Some(x) = tokens.peek() {
-                        if x.get_type() == TokenTypes::T_SEMICOLON {
+                        if x.get_type() == TokenTypes::T_SEMICOLON || x.get_type()==TokenTypes::T_RSMBRACE {
                             return Some(left);
                         }
                         next_tok = x;
@@ -70,11 +67,10 @@ pub fn build_expression_tree(tokens: &mut TokenList, prev_oppred: i32) -> Option
 
 // Build the tree for print statements
 pub fn build_print_tree(tokens: &mut TokenList) -> Box<AstNode> {
-    // Check if the first token is print or not
     match_token(&tokens.next(), TokenTypes::T_PRINT);
-    // Evaluate the expression
+    match_token(&tokens.next(),TokenTypes::T_LSMBRACE);
     let root = build_expression_tree(tokens, 0);
-    // Check for semicolon
+    match_token(&tokens.next(),TokenTypes::T_RSMBRACE);
     match_token(&tokens.next(), TokenTypes::T_SEMICOLON);
     return create_unary_node(AstOperation::Print, root, 0);
 }
@@ -103,9 +99,7 @@ pub fn build_assignment_tree(tokens: &mut TokenList) -> Box<AstNode> {
 pub fn build_if_tree(tokens: &mut TokenList) ->Box<AstNode>{
     match_token(&tokens.next(), TokenTypes::T_IF);
     match_token(&tokens.next(), TokenTypes::T_LSMBRACE);
-    
     let expr_tree_opt = build_expression_tree(tokens, 0);
-    println!("Just below lmao");
     if let Some(expr_tree) = expr_tree_opt {
         let op = expr_tree.get_op();
         if op < AstOperation::LessThan || op > AstOperation::NotEqual {
@@ -114,9 +108,9 @@ pub fn build_if_tree(tokens: &mut TokenList) ->Box<AstNode>{
         match_token(&tokens.next(),TokenTypes::T_RSMBRACE);
         let if_tree = handle_compound_statement(tokens);
         let next_token_opt = tokens.peek();
-        println!("Next token is {:?}",next_token_opt);
         if let Some(next_token) = next_token_opt{
             if next_token.get_type() == TokenTypes::T_ELSE{
+                tokens.next();
                 let else_tree = handle_compound_statement(tokens);
                 return AstNode::create(AstOperation::If, Some(expr_tree), if_tree, else_tree,0)
             }
@@ -127,5 +121,23 @@ pub fn build_if_tree(tokens: &mut TokenList) ->Box<AstNode>{
     }
     else{
         panic!("build_if_tree: failed to generate expression tree");
+    }
+}
+
+pub fn build_while_tree(tokens:&mut TokenList)->Box<AstNode>{
+    match_token(&tokens.next(),TokenTypes::T_WHILE);
+    match_token(&tokens.next(),TokenTypes::T_LSMBRACE);
+    let expr_tree_opt = build_expression_tree(tokens, 0);
+    if let Some(expr_tree) = expr_tree_opt.clone(){
+        let op = expr_tree.get_op();
+        if op < AstOperation::LessThan || op > AstOperation::NotEqual{
+            fatal_error("Invalid comparison",1);
+        }
+        match_token(&tokens.next(),TokenTypes::T_RSMBRACE);
+        let inner_tree = handle_compound_statement(tokens);
+        return AstNode::create(AstOperation::While, expr_tree_opt, None, inner_tree, 0);   
+    }
+    else{
+        panic!("build_while_tree: failed to generate expression tree");
     }
 }

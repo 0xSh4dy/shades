@@ -35,6 +35,7 @@ pub enum TokenTypes {
     T_ELSE, // else
     T_FOR, // for loop
     T_LOOP, // infinite loop
+    T_WHILE, // while loop
     T_BREAK, // break statement
     T_CEQ, // ==
     T_NEQ, // !=

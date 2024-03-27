@@ -131,7 +131,7 @@ pub fn build_while_tree(tokens:&mut TokenList)->Box<AstNode>{
     if let Some(expr_tree) = expr_tree_opt.clone(){
         let op = expr_tree.get_op();
         if op < AstOperation::LessThan || op > AstOperation::NotEqual{
-            fatal_error("Invalid comparison",1);
+            panic!("Invalid comparison in while loop");
         }
         match_token(&tokens.next(),TokenTypes::T_RSMBRACE);
         let inner_tree = handle_compound_statement(tokens);

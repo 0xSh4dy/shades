@@ -72,6 +72,7 @@ impl<'a, 'b> MathCodeGenerator<'a, 'b> {
 
             let first_param = function.get_first_param().unwrap().into_int_value();
             let second_param = function.get_nth_param(1).expect("Failed to fetch second param").into_int_value();
+            
             let result = match op {
                 MathOps::Add => builder
                     .build_int_add(first_param, second_param, "sum")
@@ -91,9 +92,11 @@ impl<'a, 'b> MathCodeGenerator<'a, 'b> {
                 MathOps::Neq => builder
                     .build_int_compare(IntPredicate::NE, first_param, second_param, "neq")
                     .unwrap(),
-                MathOps::Lt => builder
+                MathOps::Lt => {
+                    println!("Right here");
+                    builder
                     .build_int_compare(IntPredicate::SLT, first_param, second_param, "lt")
-                    .unwrap(),
+                    .unwrap()},
                 MathOps::Lte => builder
                     .build_int_compare(IntPredicate::SLE, first_param, second_param, "lte")
                     .unwrap(),

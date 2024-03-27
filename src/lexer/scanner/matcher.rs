@@ -35,6 +35,11 @@ pub fn get_keyword(s: &str) -> TokenTypes {
                     return TokenTypes::T_ELSE;
                 }
             }
+            'w' => {
+                if s == "while"{
+                    return TokenTypes::T_WHILE;
+                }
+            }
             
             _ => {}
         }

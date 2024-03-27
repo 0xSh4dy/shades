@@ -24,7 +24,6 @@ pub fn generate_code(tokens: &mut TokenList) {
 
     // Match a compound statement
     let main_tree = handle_compound_statement(tokens);
-    println!("{:#?}",main_tree);
     // Generate the IR
     let ir_generator = IrGenerator::new(&context,&module,"shades_main");
 
